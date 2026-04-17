@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Quản lý kho NVL</title>
+<style>
+body {
+    font-family: Arial;
+    background: #f4f6f9;
+    padding: 20px;
+}
+h2 { text-align: center; }
+.container {
+    max-width: 900px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+input, button {
+    padding: 8px;
+    margin: 5px;
+}
+button {
+    cursor: pointer;
+    background: #007bff;
+    color: white;
+    border: none;
+}
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h2>QUẢN LÝ NHẬP XUẤT TỒN NVL</h2>
+
+<input id="name" placeholder="Tên NVL">
+<input id="qty" type="number" placeholder="Số lượng">
+<button onclick="nhap()">Nhập</button>
+<button onclick="xuat()">Xuất</button>
+
+<table>
+<thead>
+<tr>
+<th>NVL</th>
+<th>Tồn</th>
+</tr>
+</thead>
+<tbody id="table"></tbody>
+</table>
+
+<h3>Lịch sử</h3>
+<ul id="history"></ul>
+
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem("kho")) || {};
+let history = JSON.parse(localStorage.getItem("history")) || [];
+
+function save() {
+    localStorage.setItem("kho", JSON.stringify(data));
+    localStorage.setItem("history", JSON.stringify(history));
+    render();
+}
+
+function nhap() {
+    let name = document.getElementById("name").value;
+    let qty = parseInt(document.getElementById("qty").value);
+
+    if (!name || !qty) return alert("Nhập thiếu");
+
+    data[name] = (data[name] || 0) + qty;
+
+    history.unshift(`Nhập ${name}: +${qty}`);
+    save();
+}
+
+function xuat() {
+    let name = document.getElementById("name").value;
+    let qty = parseInt(document.getElementById("qty").value);
+
+    if (!data[name] || data[name] < qty) {
+        return alert("Không đủ hàng");
+    }
+
+    data[name] -= qty;
+    history.unshift(`Xuất ${name}: -${qty}`);
+    save();
+}
+
+function render() {
+    let table = document.getElementById("table");
+    table.innerHTML = "";
+
+    for (let key in data) {
+        table.innerHTML += `
+        <tr>
+            <td>${key}</td>
+            <td>${data[key]}</td>
+        </tr>`;
+    }
+
+    let his = document.getElementById("history");
+    his.innerHTML = history.map(h => `<li>${h}</li>`).join("");
+}
+
+render();
+</script>
+
+</body>
+</html>
